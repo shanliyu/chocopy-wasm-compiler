@@ -15,6 +15,8 @@ import "./style.scss";
 import { toEditorSettings } from "typescript";
 import { replace } from "cypress/types/lodash";
 import { ErrorManager } from "./errorManager";
+import { autocompleteHint, populateAutoCompleteSrc } from "./autocomplete";
+import { default_keywords, default_functions } from "./pydefaultwordlist";
 
 function print(val: Value) {
   const elt = document.createElement("pre");
@@ -74,7 +76,7 @@ function webStart() {
           const output = document.createElement("div");
           const prompt = document.createElement("span");
           prompt.innerText = "»";
-          prompt.setAttribute("class","prompt");
+          prompt.setAttribute("class", "prompt");
           output.appendChild(prompt);
           const elt = document.createElement("textarea");
           // elt.type = "text";
@@ -187,7 +189,7 @@ function webStart() {
       }
     });
     document.addEventListener("keypress", (e) => {
-      if (e.ctrlKey && e.key === 'r') {
+      if (e.ctrlKey && e.key === "r") {
         repl = new BasicREPL(importObject);
         const source = document.getElementById("user-code") as HTMLTextAreaElement;
         resetRepl();
@@ -199,8 +201,7 @@ function webStart() {
           })
           .catch((e) => {
             renderError(e, source.value);
-            if(e.loc != undefined)
-              highlightLine(e.loc.line - 1, e.message);
+            if (e.loc != undefined) highlightLine(e.loc.line - 1, e.message);
             console.log("run failed", e.stack);
           });
       }
@@ -226,6 +227,10 @@ function webStart() {
       dropdown.appendChild(option);
     }
 
+    //necessary variables for autocomplete logic
+    var isClassMethod = false;
+    var classMethodList: string[] = [];
+    var defList: string[] = [];
     const textarea = document.getElementById("user-code") as HTMLTextAreaElement;
     const editor = CodeMirror.fromTextArea(textarea, {
       mode: "python",
@@ -250,10 +255,58 @@ function webStart() {
     editor.on("inputRead", function onChange(editor, input) {
       if (input.text[0] === ";" || input.text[0] === " " || input.text[0] === ":") {
         return;
+      } else if (input.text[0] === "." || isClassMethod) {
+        //autocomplete class methods
+        isClassMethod = true;
+        editor.showHint({
+          hint: () =>
+            autocompleteHint(editor, classMethodList, function (e: any, cur: any) {
+              return e.getTokenAt(cur);
+            }),
+        });
+      } else {
+        //autocomplete variables, names, top-level functions
+        editor.showHint({
+          hint: () =>
+            autocompleteHint(
+              editor,
+              default_keywords.concat(default_functions).concat(defList),
+              function (e: any, cur: any) {
+                return e.getTokenAt(cur);
+              }
+            ),
+        });
       }
-      editor.showHint({
-        // hint:
-      });
+    });
+
+    editor.on("keydown", (cm, event) => {
+      switch (event.code) {
+        //reset isClassMethod variable based on enter or space or backspace
+        case "Enter":
+          isClassMethod = false;
+          //compile code in background to get populate environment for autocomplete
+          var importObject = {
+            imports: {
+              print: print,
+              abs: Math.abs,
+              min: Math.min,
+              max: Math.max,
+              pow: Math.pow,
+            },
+          };
+          const repl = new BasicREPL(importObject);
+          const source = document.getElementById("user-code") as HTMLTextAreaElement;
+          repl.run(source.value).then((r) => {
+            [defList, classMethodList] = populateAutoCompleteSrc(repl);
+          });
+          return;
+        case "Space":
+          isClassMethod = false;
+          return;
+        case "Backspace":
+          isClassMethod = false;
+          return;
+      }
     });
 
     var themeDropDown = document.getElementById("themes") as HTMLSelectElement;
@@ -266,7 +319,6 @@ function webStart() {
 
 
   });
-  
 }
 function adjustLayout(hiderepl:boolean){
   //adjust layout to fit the tab size
