@@ -176,13 +176,13 @@ function webStart() {
       var editor = document.getElementById("editor");
       var interactions = document.getElementById("interactions");
       if (button.innerText == "Hide REPLs"){
-        if (window.innerWidth>=840) editor.style.width = "96%";
+        if (window.innerWidth>=840) editor.style.width = "100%";
         interactions.style.display = "none";
         button.innerText = "Display REPLs";
         hiderepl = true;
       }
       else{
-        if (window.innerWidth>=840) editor.style.width = "46%";
+        if (window.innerWidth>=840) editor.style.width = "50%";
         interactions.style.display = "inline";
         button.innerText = "Hide REPLs";
         hiderepl = false;
