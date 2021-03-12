@@ -253,6 +253,7 @@ function webStart() {
       gutters: ["error"],
       extraKeys: {
         "Ctrl+Space": "autocomplete",
+        "Enter": function(cm: any){ cm.replaceSelection("\n")} //prevent newlineAndIndent
       },
       hintOptions: {
         alignWithWord: false,
