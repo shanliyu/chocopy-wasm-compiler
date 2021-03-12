@@ -118,8 +118,8 @@ function webStart() {
         })
         .catch((e) => {
           renderError(e, source.value);
-          if(e.callStack != undefined)
-            highlightLine(e.callStack[e.callStack.length-1].line - 1, e.message);
+          if (e.callStack != undefined)
+            highlightLine(e.callStack[e.callStack.length - 1].line - 1, e.message);
           console.log("run failed", e.stack);
         });
     });
@@ -175,14 +175,13 @@ function webStart() {
       var button = document.getElementById("hiderepls");
       var editor = document.getElementById("editor");
       var interactions = document.getElementById("interactions");
-      if (button.innerText == "Hide REPLs"){
-        if (window.innerWidth>=840) editor.style.width = "100%";
+      if (button.innerText == "Hide REPLs") {
+        if (window.innerWidth >= 840) editor.style.width = "100%";
         interactions.style.display = "none";
         button.innerText = "Display REPLs";
         hiderepl = true;
-      }
-      else{
-        if (window.innerWidth>=840) editor.style.width = "50%";
+      } else {
+        if (window.innerWidth >= 840) editor.style.width = "50%";
         interactions.style.display = "inline";
         button.innerText = "Hide REPLs";
         hiderepl = false;
@@ -210,11 +209,11 @@ function webStart() {
   });
   window.addEventListener("resize", (event) => {
     adjustLayout(hiderepl);
-  })
+  });
   window.addEventListener("load", (event) => {
     adjustLayout(hiderepl);
     var interactions = document.getElementById("interactions");
-    if (window.innerHeight>900){
+    if (window.innerHeight > 900) {
       interactions.style.height = "800px";
     }
 
@@ -315,24 +314,19 @@ function webStart() {
       var editor = ele.CodeMirror;
       editor.setOption("theme", themeDropDown.value);
     });
-
-
-
   });
 }
-function adjustLayout(hiderepl:boolean){
+function adjustLayout(hiderepl: boolean) {
   //adjust layout to fit the tab size
   var editor = document.getElementById("editor");
   var interactions = document.getElementById("interactions");
-  if (window.innerWidth<840) {
+  if (window.innerWidth < 840) {
     editor.style.width = "100%";
     interactions.style.width = "100%";
-  }
-  else{
-    if (hiderepl==false){
+  } else {
+    if (hiderepl == false) {
       editor.style.width = "50%";
-    }
-    else{
+    } else {
       editor.style.width = "100%";
     }
     interactions.style.width = "50%";
