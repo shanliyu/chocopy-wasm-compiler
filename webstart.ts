@@ -253,6 +253,7 @@ function webStart() {
     });
     editor.on("inputRead", function onChange(editor, input) {
       if (input.text[0] === ";" || input.text[0] === " " || input.text[0] === ":") {
+        isClassMethod = false;
         return;
       } else if (input.text[0] === "." || isClassMethod) {
         //autocomplete class methods
